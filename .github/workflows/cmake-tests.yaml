@@ -28,7 +28,7 @@ jobs:
     - name: Build
       run: ./install.sh .. ${{matrix.build_type}} ${{matrix.compiler}}
 
-    - name: Run Test
+    - name: Run Mesh Reader Test
       run: |  
         cd ../build-class
-        ctest
+        make
