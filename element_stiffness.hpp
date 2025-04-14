@@ -47,21 +47,21 @@ public:
                                      const Kokkos::View<double*>& f,
                                      Kokkos::View<double**>& Fe) const;
 
-    // For single element calculations (for testing)
+    // // testing
     
-    void computeTriangleStiffness(const double coords[3][2], double K[3][3]) const;
+    // void computeTriangleStiffness(const double coords[3][2], double K[3][3]) const;
 
-    // For single element calculations (for testing)
+    // // for testing
     
-    void computeQuadStiffness(const double coords[4][2], double K[4][4]) const;
+    // void computeQuadStiffness(const double coords[4][2], double K[4][4]) const;
 
-    // For single element calculations (for testing)
+    // // for testing
     
-    void computeTriangleLoadVector(const double coords[3][2], const double f, double Fe[3]) const;
+    // void computeTriangleLoadVector(const double coords[3][2], const double f, double Fe[3]) const;
     
-    // For single element calculations (for testing)
+    // // for testing
     
-    void computeQuadLoadVector(const double coords[4][2], const double f, double Fe[4]) const;
+    // void computeQuadLoadVector(const double coords[4][2], const double f, double Fe[4]) const;
 
 private:
     double kappa_;  // Material property
