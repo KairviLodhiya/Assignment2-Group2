@@ -3,7 +3,7 @@ build_type=$2
 compiler=$3
 
 # Build Kokkos
-r, $dir/kokkos -rf
+rm $dir/kokkos -rf
 git clone https://github.com/kokkos/kokkos $dir/kokkos
 
 rm $dir/build-kokkos -rf
