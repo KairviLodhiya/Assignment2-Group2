@@ -32,3 +32,4 @@ jobs:
       run: |  
         cd ../build-class
         make
+        ./mesh_reader_test
