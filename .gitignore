@@ -1,14 +1,50 @@
-# Ignore build directory
+=======
+# === Build Artifacts ===
 build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# === Kokkos & Object Files ===
+*.o
+*.a
+*.so
+*.out
+*.exe
+*.dll
+*.dylib
+kokkos/
+
+# === Catch2 Build Cache ===
+external/Catch2/build/
+external/Catch2/.vs/
+external/ 
+
+# === VS Code ===
+.vscode/
+*.code-workspace
+
+# === IDE & Backup Files ===
+*.user
+*.suo
+*.sdf
+*.log
+*.tmp
+*.swp
+*.bak
+*~
 
 # Ignore temporary files
 *.tmp
 *.log
 
-# Ignore compiled binaries
-*.o
-*.out
-*.exe
-
 # Ignore created bash runners
 *.sh
+
+Test1.cpp
+/SparseMatrixTests
+/LoadVectorTests
+CMakeLists.txt
+/README.md
+
