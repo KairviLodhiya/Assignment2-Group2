@@ -1,0 +1,14 @@
+# Ignore build directory
+build/
+
+# Ignore temporary files
+*.tmp
+*.log
+
+# Ignore compiled binaries
+*.o
+*.out
+*.exe
+
+# Ignore created bash runners
+*.sh
