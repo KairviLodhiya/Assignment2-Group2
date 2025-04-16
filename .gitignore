@@ -1,3 +1,4 @@
+=======
 # === Build Artifacts ===
 build/
 CMakeFiles/
@@ -9,6 +10,8 @@ Makefile
 *.o
 *.a
 *.so
+*.out
+*.exe
 *.dll
 *.dylib
 kokkos/
@@ -32,8 +35,16 @@ external/
 *.bak
 *~
 
+# Ignore temporary files
+*.tmp
+*.log
+
+# Ignore created bash runners
+*.sh
+
 Test1.cpp
 /SparseMatrixTests
 /LoadVectorTests
 CMakeLists.txt
 /README.md
+
