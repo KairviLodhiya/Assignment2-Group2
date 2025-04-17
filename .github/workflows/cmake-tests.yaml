@@ -31,4 +31,4 @@ jobs:
       run: |
         cd ../build-class
         make
-        ./all_tests
+        ./all_tests --reporter console --success
