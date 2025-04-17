@@ -33,3 +33,5 @@ jobs:
         cd ../build-class
         make
         ./mesh_reader_test
+        ./element_stiffness_test
+      
