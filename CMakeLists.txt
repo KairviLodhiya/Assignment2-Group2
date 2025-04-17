@@ -50,13 +50,13 @@ target_link_libraries(load_vector_lib PUBLIC Kokkos::kokkos)
 # Combined Test Executable
 # --------------------------
 add_executable(all_tests
-    testing/test_main.cpp
-    testing/test_read_mesh_integration.cpp
-    testing/test_element_stiffness.cpp
-    testing/test_sparse_matrix.cpp
-    testing/test_load_vector.cpp
-    testing/test_mesh_reader.cpp
-    testing/test_assembly.cpp
+    Testing/test_main.cpp
+    Testing/test_read_mesh_integration.cpp
+    Testing/test_element_stiffness.cpp
+    Testing/test_sparse_matrix.cpp
+    Testing/test_load_vector.cpp
+    Testing/test_mesh_reader.cpp
+    Testing/test_assembly.cpp
 )
 
 target_link_libraries(all_tests
