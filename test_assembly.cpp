@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <Kokkos_Core.hpp>
 #include <fstream>
 #include <filesystem>
@@ -8,6 +9,8 @@
 #include "assemble_system.hpp"
 #include "LoadVector.hpp"
 #include "SparseMatrixCSR.hpp"
+
+using namespace Catch::Matchers;
 
 TEST_CASE("Assemble system from mesh", "[assembly]") {
     std::string mesh_file = std::filesystem::temp_directory_path() / "test_assembly_mesh.msh";
@@ -41,7 +44,8 @@ $EndElements
     assemble_system(mesh, K_global, F_global, 1.0, f_elem);
 
     auto F_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), F_global.get_data());
-    REQUIRE(F_host(0) + F_host(1) + F_host(2) == Catch::Approx(1.0).margin(1e-12));
+    double total_force = F_host(0) + F_host(1) + F_host(2);
+    REQUIRE_THAT(total_force, WithinAbs(1.0, 1e-12));
 
     REQUIRE(K_global.numRows == mesh.num_nodes);
     REQUIRE(K_global.numCols == mesh.num_nodes);
