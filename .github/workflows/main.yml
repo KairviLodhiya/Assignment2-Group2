@@ -35,7 +35,7 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        cmake .. -DKokkos_DIR=$GITHUB_WORKSPACE/kokkos-install/lib/cmake/Kokkos
+        cmake .. \ -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/kokkos-install \ -DKokkos_DIR=$GITHUB_WORKSPACE/kokkos-install/lib/cmake/Kokkos
 
     - name: Build test executables
       run: |
