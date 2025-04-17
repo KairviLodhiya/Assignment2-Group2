@@ -27,33 +27,8 @@ jobs:
 
     - name: Build
       run: ./install.sh .. ${{matrix.build_type}} ${{matrix.compiler}}
-
-    - name: Run Mesh Reader Test
-      run: |  
+    - name: Run All FEM Tests
+      run: |
         cd ../build-class
         make
-        ./mesh_reader_test
-    
-    - name: Run Sparse Matrix Tests
-      run: | 
-        cd ../build-class
-        make
-        ./SparseMatrixTests
-
-    - name: Run Load Vector Tests
-      run: | 
-        cd ../build-class
-        make
-        ./LoadVectorTests
-    
-    - name: Run Element Stiffness Test
-      run: | 
-        cd ../build-class
-        make
-        ./element_stiffness_test
-    - name: Run Mesh Reader and Element Stiffness Integration
-      run: | 
-        cd ../build-class
-        make
-        ./ReadMeshIntegrationTest
-      
+        ./all_tests

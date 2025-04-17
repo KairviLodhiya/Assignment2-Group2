@@ -41,7 +41,7 @@ add_executable(all_tests
     test_element_stiffness.cpp
     test_sparse_matrix.cpp
     test_load_vector.cpp
-    mesh_reader_test.cpp
+    test_mesh_reader.cpp
 )
 
 target_link_libraries(all_tests
