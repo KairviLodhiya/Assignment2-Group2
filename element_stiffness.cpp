@@ -2,6 +2,9 @@
 
 ElementStiffness::ElementStiffness(double kappa) : kappa_(kappa) {} // Constructor to initialize kappa
 
+// Compute stiffness matrix for triangular elements
+// The stiffness matrix is computed using the shape functions and their derivatives 
+// Transformation from parametric to physical coordinates is done using the Jacobian
 void ElementStiffness::computeTriangleStiffnessKokkos(const Kokkos::View<double***>& coords, 
                                                      Kokkos::View<double***>& K) const { // Compute stiffness matrix for triangle elements
     using policy_type = Kokkos::RangePolicy<>;  // Rangepolicy used to parallelize the loop
@@ -17,7 +20,22 @@ void ElementStiffness::computeTriangleStiffnessKokkos(const Kokkos::View<double*
             double y2 = coords(elem, 1, 1);
             double x3 = coords(elem, 2, 0);
             double y3 = coords(elem, 2, 1);
-            
+
+            // the global coordinates of the interial points is given by 
+            // x = N1*x1 + N2*x2 + N3*x3 and y = N1*y1 + N2*y2 + N3*y3
+            // where N1, N2, N3 are the shape functions
+            // For triangles:
+            // N1 = 1 - xi - eta
+            // N2 = xi
+            // N3 = eta
+
+            // the matrix for the Jacobian is given by
+            // j = [ dx/dxi  dx/deta;
+            //       dy/dxi  dy/deta]
+            // where dx/dxi = x2 - x1, 
+            // dx/deta = x3 - x1,
+            // dy/dxi = y2 - y1, 
+            // dy/deta = y3 - y1
             // Calculate Jacobian directly from vertices
             double dx_dxi_00 = x2 - x1;  // dx/dxi
             double dx_dxi_01 = x3 - x1;  // dx/deta
@@ -25,13 +43,18 @@ void ElementStiffness::computeTriangleStiffnessKokkos(const Kokkos::View<double*
             double dx_dxi_11 = y3 - y1;  // dy/deta
             
             // Calculate determinant and inverse of Jacobian
-            double detJ = dx_dxi_00 * dx_dxi_11 - dx_dxi_01 * dx_dxi_10;
+            //double detJ = dx_dxi_00 * dx_dxi_11 - dx_dxi_01 * dx_dxi_10;
+            double detJ = Kokkos::fabs(dx_dxi_00 * dx_dxi_11 - dx_dxi_01 * dx_dxi_10);
             
             // Check for singular Jacobian - use Kokkos::fabs for CUDA compatibility
             if (Kokkos::fabs(detJ) < 1e-10) {
                 detJ = 1e-10;
             }
             
+            // Calculate inverse of Jacobian
+            // J^-1 = 1/detJ * [ dy/deta  -dx/deta;
+            //                  -dy/dxi  dx/dxi]
+
             double invDetJ = 1.0 / detJ;
             double dxi_dx_00 =  dx_dxi_11 * invDetJ;
             double dxi_dx_01 = -dx_dxi_01 * invDetJ;
@@ -48,8 +71,8 @@ void ElementStiffness::computeTriangleStiffnessKokkos(const Kokkos::View<double*
             double dN_dx[3][2];
             
             // Node 1
-            dN_dx[0][0] = -1.0 * dxi_dx_00 + -1.0 * dxi_dx_10;  // dN1/dx
-            dN_dx[0][1] = -1.0 * dxi_dx_01 + -1.0 * dxi_dx_11;  // dN1/dy
+            dN_dx[0][0] = -1.0 * dxi_dx_00 -1.0 * dxi_dx_10;  // dN1/dx
+            dN_dx[0][1] = -1.0 * dxi_dx_01 -1.0 * dxi_dx_11;  // dN1/dy
             
             // Node 2
             dN_dx[1][0] = 1.0 * dxi_dx_00 + 0.0 * dxi_dx_10;  // dN2/dx
@@ -64,7 +87,7 @@ void ElementStiffness::computeTriangleStiffnessKokkos(const Kokkos::View<double*
                 for (int B = 0; B < 3; B++) {
                     double temp = 0.0;
                     for (int i = 0; i < 2; i++) {
-                        temp += kappa * dN_dx[A][i] * dN_dx[B][i] * detJ;
+                        temp += kappa * detJ * dN_dx[A][i] * dN_dx[B][i] ;
                     }
                     K(elem, A, B) = temp;
                 }
@@ -73,6 +96,9 @@ void ElementStiffness::computeTriangleStiffnessKokkos(const Kokkos::View<double*
     );
 }
 
+// Compute stiffness matrix for quadrilateral elements
+// The stiffness matrix is computed using the shape functions and their derivatives
+// Transformation from parametric to physical coordinates is done using the Jacobian
 void ElementStiffness::computeQuadStiffnessKokkos(const Kokkos::View<double***>& coords, 
                                                  Kokkos::View<double***>& K) const {  // view used because it is a 3D array
     using policy_type = Kokkos::RangePolicy<>;
@@ -130,7 +156,7 @@ void ElementStiffness::computeQuadStiffnessKokkos(const Kokkos::View<double***>&
                     }
                     
                     // Calculate determinant of Jacobian
-                    double detJ = dx_dxi_00 * dx_dxi_11 - dx_dxi_01 * dx_dxi_10;
+                    double detJ = Kokkos::fabs(dx_dxi_00 * dx_dxi_11 - dx_dxi_01 * dx_dxi_10);
                     
                     // Check for singular Jacobian
                     if (Kokkos::fabs(detJ) < 1e-10) {
@@ -154,11 +180,11 @@ void ElementStiffness::computeQuadStiffnessKokkos(const Kokkos::View<double***>&
                     }
                     
                     // Calculate shape functions at this point (needed for load vector computations)
-                    double N[4];
-                    N[0] = 0.25 * (1.0 - xi) * (1.0 - eta);
-                    N[1] = 0.25 * (1.0 + xi) * (1.0 - eta);
-                    N[2] = 0.25 * (1.0 + xi) * (1.0 + eta);
-                    N[3] = 0.25 * (1.0 - xi) * (1.0 + eta);
+                    // double N[4];
+                    // N[0] = 0.25 * (1.0 - xi) * (1.0 - eta);
+                    // N[1] = 0.25 * (1.0 + xi) * (1.0 - eta);
+                    // N[2] = 0.25 * (1.0 + xi) * (1.0 + eta);
+                    // N[3] = 0.25 * (1.0 - xi) * (1.0 + eta);
                     
                     // Add contribution to stiffness matrix
                     for (int A = 0; A < 4; A++) {
@@ -176,6 +202,8 @@ void ElementStiffness::computeQuadStiffnessKokkos(const Kokkos::View<double***>&
     );
 }
 
+// Function to create the load vector for triangular elements from the force vector
+// The Load vector is transforming the force vector from the global coordinates to the local coordinates
 void ElementStiffness::computeTriangleLoadVectorKokkos(const Kokkos::View<double***>& coords, 
                                                       const Kokkos::View<double*>& f,
                                                       Kokkos::View<double**>& Fe) const {
@@ -213,6 +241,8 @@ void ElementStiffness::computeTriangleLoadVectorKokkos(const Kokkos::View<double
     );
 }
 
+// Function to create the load vector for quadrilateral elements from the force vector
+// The Load vector is transforming the force vector from the global coordinates to the local coordinates
 void ElementStiffness::computeQuadLoadVectorKokkos(const Kokkos::View<double***>& coords, 
                                                   const Kokkos::View<double*>& f,
                                                   Kokkos::View<double**>& Fe) const {
@@ -284,9 +314,14 @@ void ElementStiffness::computeQuadLoadVectorKokkos(const Kokkos::View<double***>
                     
                     // Add contribution to load vector
                     for (int A = 0; A < 4; A++) {
-                        Fe(elem, A) += f(elem) * N[A] * detJ * weight;
+                        localFe[A] += f(elem) * N[A] * detJ * weight;
                     }
                 }
+            }
+            
+            // Copy back to Kokkos View
+            for (int i = 0; i < 4; i++) {
+                Fe(elem, i) = localFe[i];
             }
         }
     );
