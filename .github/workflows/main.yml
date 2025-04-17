@@ -1,4 +1,4 @@
-name: Test Sparse Matrix and Load Vector
+name: Build and Test with Catch2
 
 on:
   push:
@@ -17,13 +17,25 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake build-essential
+        sudo apt-get install -y cmake build-essential git
 
-    - name: Configure CMake
+    - name: Clone and build Kokkos (CPU-only)
+      run: |
+        git clone https://github.com/kokkos/kokkos.git
+        cd kokkos
+        mkdir build && cd build
+        cmake .. -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/kokkos-install \
+                 -DKokkos_ENABLE_SERIAL=ON \
+                 -DKokkos_ENABLE_OPENMP=ON \
+                 -DCMAKE_CXX_STANDARD=17
+        make -j2
+        make install
+
+    - name: Configure CMake project
       run: |
         mkdir -p build
         cd build
-        cmake ..
+        cmake .. -DKokkos_DIR=$GITHUB_WORKSPACE/kokkos-install/lib/cmake/Kokkos
 
     - name: Build test executables
       run: |
