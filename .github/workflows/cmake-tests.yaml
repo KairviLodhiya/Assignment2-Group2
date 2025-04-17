@@ -51,4 +51,9 @@ jobs:
         cd ../build-class
         make
         ./element_stiffness_test
+    - name: Run Mesh Reader and Element Stiffness Integration
+      run: | 
+        cd ../build-class
+        make
+        ./ReadMeshIntegrationTest
       
