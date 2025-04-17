@@ -1,0 +1,37 @@
+name: Test Sparse Matrix and Load Vector
+
+on:
+  push:
+    branches: [ main, kairvi ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake build-essential
+
+    - name: Configure CMake
+      run: |
+        mkdir -p build
+        cd build
+        cmake ..
+
+    - name: Build test executables
+      run: |
+        cd build
+        make
+
+    - name: Run SparseMatrixTests
+      run: ./build/SparseMatrixTests
+
+    - name: Run LoadVectorTests
+      run: ./build/LoadVectorTests
