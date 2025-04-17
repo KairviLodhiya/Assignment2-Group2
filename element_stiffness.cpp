@@ -251,6 +251,7 @@ void ElementStiffness::computeQuadLoadVectorKokkos(const Kokkos::View<double***>
     
     Kokkos::parallel_for("ComputeQuadLoadVector", policy_type(0, numElements), 
         KOKKOS_LAMBDA(const int elem) {
+            Kokkos::View<double[4], Kokkos::LayoutRight, Kokkos::MemoryTraits<Kokkos::Unmanaged>> localFe;
             // Initialize Fe to zero for this element
             for (int i = 0; i < 4; i++) {
                 Fe(elem, i) = 0.0;
