@@ -3,7 +3,7 @@
 #include <Kokkos_Core.hpp>
 #include <fstream>
 #include <filesystem>
-#include "../Read Mesh/mesh_reader_kokkos.hpp" 
+#include "../Read_Mesh/mesh_reader_kokkos.hpp" 
 
 using namespace Catch::Matchers;
 

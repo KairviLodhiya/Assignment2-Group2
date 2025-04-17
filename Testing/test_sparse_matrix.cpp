@@ -1,7 +1,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
-#include "SparseMatrixCSR.hpp"
+#include "../Global/SparseMatrixCSR.hpp"
 #include <Kokkos_Core.hpp>
 
 using Catch::Approx;
