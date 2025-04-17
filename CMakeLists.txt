@@ -21,42 +21,42 @@ find_package(Catch2 3 REQUIRED)
 # --------------------------
 # Mesh Reader Library
 # --------------------------
-add_library(mesh_reader ../Read_Mesh/mesh_reader_kokkos.cpp)
-target_include_directories(mesh_reader PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(mesh_reader Read_Mesh/mesh_reader_kokkos.cpp)
+target_include_directories(mesh_reader PUBLIC ${CMAKE_SOURCE_DIR})
 target_link_libraries(mesh_reader PUBLIC Kokkos::kokkos)
 
 # --------------------------
 # Element Stiffness Library
 # --------------------------
-add_library(element_stiffness ../Element/element_stiffness.cpp)
-target_include_directories(element_stiffness PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(element_stiffness Element/element_stiffness.cpp)
+target_include_directories(element_stiffness PUBLIC ${CMAKE_SOURCE_DIR})
 target_link_libraries(element_stiffness PUBLIC Kokkos::kokkos)
 
 # --------------------------
 # Sparse Matrix Library
 # --------------------------
-add_library(sparse_matrix_lib ../Global/SparseMatrixCSR.cpp)
-target_include_directories(sparse_matrix_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(sparse_matrix_lib Global/SparseMatrixCSR.cpp)
+target_include_directories(sparse_matrix_lib PUBLIC ${CMAKE_SOURCE_DIR})
 target_link_libraries(sparse_matrix_lib PUBLIC Kokkos::kokkos)
 
 # --------------------------
 # Load Vector Library
 # --------------------------
-add_library(load_vector_lib ../Global/LoadVector.hpp)
-target_include_directories(load_vector_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(load_vector_lib Global/LoadVector.hpp) 
+target_include_directories(load_vector_lib PUBLIC ${CMAKE_SOURCE_DIR})
 target_link_libraries(load_vector_lib PUBLIC Kokkos::kokkos)
 
 # --------------------------
 # Combined Test Executable
 # --------------------------
 add_executable(all_tests
-    ../testing/test_main.cpp                 # Catch2 main() with Kokkos::initialize/finalize
-    ../testing/test_read_mesh_integration.cpp
-    ../testing/test_element_stiffness.cpp
-    ../testing/test_sparse_matrix.cpp
-    ../testing/test_load_vector.cpp
-    ../testing/test_mesh_reader.cpp
-    ../testing/test_assembly.cpp            
+    testing/test_main.cpp
+    testing/test_read_mesh_integration.cpp
+    testing/test_element_stiffness.cpp
+    testing/test_sparse_matrix.cpp
+    testing/test_load_vector.cpp
+    testing/test_mesh_reader.cpp
+    testing/test_assembly.cpp
 )
 
 target_link_libraries(all_tests
