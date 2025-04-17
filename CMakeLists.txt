@@ -67,4 +67,21 @@ target_include_directories(LoadVectorTests PRIVATE
   ${CMAKE_SOURCE_DIR}/external/Catch2/src
 )
 
+# --------------------------
+# Read Mesh Integration Test
+# --------------------------
+add_executable(ReadMeshIntegrationTest
+    test_read_mesh_integration.cpp
+)
 
+target_link_libraries(ReadMeshIntegrationTest
+  PRIVATE
+    mesh_reader
+    element_stiffness
+    Kokkos::kokkos
+    Catch2::Catch2WithMain
+)
+
+target_include_directories(ReadMeshIntegrationTest PRIVATE
+  ${CMAKE_SOURCE_DIR}
+)
