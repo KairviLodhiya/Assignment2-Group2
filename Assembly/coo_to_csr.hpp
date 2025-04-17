@@ -5,7 +5,7 @@
 #include <tuple>
 #include <algorithm>
 #include <stdexcept>
-#include "SparseMatrixCSR.hpp"
+#include "../Global/SparseMatrixCSR.hpp"
 
 struct COOMatrix {
     int rows, cols;

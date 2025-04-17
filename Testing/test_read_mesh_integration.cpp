@@ -5,9 +5,9 @@
 #include <string>
 #include <filesystem>
 
-#include "mesh_reader_kokkos.hpp"
-#include "create_element_coordinates.hpp"
-#include "element_stiffness.hpp"
+#include "../Read Mesh/mesh_reader_kokkos.hpp"
+#include "../Element/create_element_coordinates.hpp"
+#include "../Element/element_stiffness.hpp"
 
 using Catch::Matchers::WithinAbs;
 

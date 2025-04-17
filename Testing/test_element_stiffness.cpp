@@ -2,7 +2,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 #include <Kokkos_Core.hpp>
-#include "element_stiffness.hpp"
+#include "../Element/element_stiffness.hpp"
 
 
 TEST_CASE("Triangle stiffness matrix", "[ElementStiffness]") {

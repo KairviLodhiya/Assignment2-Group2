@@ -1,5 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include "LoadVector.hpp"
+#include "../Global/LoadVector.hpp"
 #include <catch2/catch_approx.hpp>
 #include <Kokkos_Core.hpp>
 

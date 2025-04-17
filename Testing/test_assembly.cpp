@@ -3,12 +3,12 @@
 #include <Kokkos_Core.hpp>
 #include <fstream>
 #include <filesystem>
-#include "mesh_reader_kokkos.hpp"
-#include "element_stiffness.hpp"
-#include "coo_to_csr.hpp"
-#include "assemble_system.hpp"
-#include "LoadVector.hpp"
-#include "SparseMatrixCSR.hpp"
+#include "../Read Mesh/mesh_reader_kokkos.hpp"
+#include "../Element/element_stiffness.hpp"
+#include "../Assembly/coo_to_csr.hpp"
+#include "../Assembly/assemble_system.hpp"
+#include "../Global/LoadVector.hpp"
+#include "../Global/SparseMatrixCSR.hpp"
 
 using namespace Catch::Matchers;
 
