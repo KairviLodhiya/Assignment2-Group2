@@ -243,84 +243,79 @@ void ElementStiffness::computeTriangleLoadVectorKokkos(const Kokkos::View<double
 
 // Function to create the load vector for quadrilateral elements from the force vector
 // The Load vector is transforming the force vector from the global coordinates to the local coordinates
-void ElementStiffness::computeQuadLoadVectorKokkos(const Kokkos::View<double***>& coords, 
-                                                  const Kokkos::View<double*>& f,
-                                                  Kokkos::View<double**>& Fe) const {
+void ElementStiffness::computeQuadLoadVectorKokkos(
+    const Kokkos::View<double***>& coords, 
+    const Kokkos::View<double*>& f,
+    Kokkos::View<double**>& Fe) const 
+{
     using policy_type = Kokkos::RangePolicy<>;
     const int numElements = coords.extent(0);
-    
-    Kokkos::parallel_for("ComputeQuadLoadVector", policy_type(0, numElements), 
+
+    Kokkos::parallel_for("ComputeQuadLoadVector", policy_type(0, numElements),
         KOKKOS_LAMBDA(const int elem) {
-            // Initialize Fe to zero for this element
-            for (int i = 0; i < 4; i++) {
-                Fe(elem, i) = 0.0;
-            }
-            
-            // Gauss quadrature points and weights for 2x2 quadrature
-            const double gaussPoints[2] = {-1.0/Kokkos::sqrt(3.0), 1.0/Kokkos::sqrt(3.0)};
-            const double gaussWeights[2] = {1.0, 1.0};
-            
-            // Loop over quadrature points
-            for (int i = 0; i < 2; i++) {
-                for (int j = 0; j < 2; j++) {
+            // Local load vector
+            double localFe[4] = {0.0, 0.0, 0.0, 0.0};
+
+            // Gauss quadrature points and weights for 2x2 integration
+            const double gaussPoints[2] = { -1.0 / Kokkos::sqrt(3.0), 1.0 / Kokkos::sqrt(3.0) };
+            const double gaussWeights[2] = { 1.0, 1.0 };
+
+            // Loop over Gauss points
+            for (int i = 0; i < 2; ++i) {
+                for (int j = 0; j < 2; ++j) {
                     double xi = gaussPoints[i];
                     double eta = gaussPoints[j];
                     double weight = gaussWeights[i] * gaussWeights[j];
-                    
-                    // Calculate shape function derivatives for Jacobian calculation
-                    double dN_dxi[4];
-                    double dN_deta[4];
-                    
-                    // dN/dxi
-                    dN_dxi[0] = -0.25 * (1.0 - eta);
-                    dN_dxi[1] =  0.25 * (1.0 - eta);
-                    dN_dxi[2] =  0.25 * (1.0 + eta);
-                    dN_dxi[3] = -0.25 * (1.0 + eta);
-                    
-                    // dN/deta
-                    dN_deta[0] = -0.25 * (1.0 - xi);
-                    dN_deta[1] = -0.25 * (1.0 + xi);
-                    dN_deta[2] =  0.25 * (1.0 + xi);
-                    dN_deta[3] =  0.25 * (1.0 - xi);
-                    
-                    // Calculate Jacobian at this integration point
-                    double dx_dxi_00 = 0.0;
-                    double dx_dxi_01 = 0.0;
-                    double dx_dxi_10 = 0.0;
-                    double dx_dxi_11 = 0.0;
-                    
-                    // Calculate Jacobian
-                    for (int n = 0; n < 4; n++) {
-                        dx_dxi_00 += dN_dxi[n] * coords(elem, n, 0);   // dx/dxi
-                        dx_dxi_01 += dN_deta[n] * coords(elem, n, 0);  // dx/deta
-                        dx_dxi_10 += dN_dxi[n] * coords(elem, n, 1);   // dy/dxi
-                        dx_dxi_11 += dN_deta[n] * coords(elem, n, 1);  // dy/deta
+
+                    // Derivatives of shape functions w.r.t xi and eta
+                    double dN_dxi[4] = {
+                        -0.25 * (1.0 - eta),
+                         0.25 * (1.0 - eta),
+                         0.25 * (1.0 + eta),
+                        -0.25 * (1.0 + eta)
+                    };
+
+                    double dN_deta[4] = {
+                        -0.25 * (1.0 - xi),
+                        -0.25 * (1.0 + xi),
+                         0.25 * (1.0 + xi),
+                         0.25 * (1.0 - xi)
+                    };
+
+                    // Compute Jacobian components
+                    double dx_dxi_00 = 0.0, dx_dxi_01 = 0.0;
+                    double dx_dxi_10 = 0.0, dx_dxi_11 = 0.0;
+
+                    for (int n = 0; n < 4; ++n) {
+                        dx_dxi_00 += dN_dxi[n] * coords(elem, n, 0); // dx/dxi
+                        dx_dxi_01 += dN_deta[n] * coords(elem, n, 0); // dx/deta
+                        dx_dxi_10 += dN_dxi[n] * coords(elem, n, 1); // dy/dxi
+                        dx_dxi_11 += dN_deta[n] * coords(elem, n, 1); // dy/deta
                     }
-                    
-                    // Calculate determinant of Jacobian
+
+                    // Determinant of Jacobian
                     double detJ = dx_dxi_00 * dx_dxi_11 - dx_dxi_01 * dx_dxi_10;
-                    
-                    // Check for singular Jacobian
                     if (Kokkos::fabs(detJ) < 1e-10) {
-                        detJ = 1e-10;
+                        detJ = 1e-10; // Avoid division by zero or near-singular matrix
                     }
-                    
-                    // Calculate shape functions at this point
-                    double N[4];
-                    N[0] = 0.25 * (1.0 - xi) * (1.0 - eta);
-                    N[1] = 0.25 * (1.0 + xi) * (1.0 - eta);
-                    N[2] = 0.25 * (1.0 + xi) * (1.0 + eta);
-                    N[3] = 0.25 * (1.0 - xi) * (1.0 + eta);
-                    
-                    // Add contribution to load vector
-                    for (int A = 0; A < 4; A++) {
+
+                    // Shape functions at Gauss point
+                    double N[4] = {
+                        0.25 * (1.0 - xi) * (1.0 - eta),
+                        0.25 * (1.0 + xi) * (1.0 - eta),
+                        0.25 * (1.0 + xi) * (1.0 + eta),
+                        0.25 * (1.0 - xi) * (1.0 + eta)
+                    };
+
+                    // Assemble local load vector
+                    for (int A = 0; A < 4; ++A) {
                         localFe[A] += f(elem) * N[A] * detJ * weight;
                     }
                 }
             }
-            
-            // Copy back to Kokkos View
-            for (int i = 0; i < 4; i++) {
+
+            // Store local result in global view
+            for (int i = 0; i < 4; ++i) {
                 Fe(elem, i) = localFe[i];
             }
         }
