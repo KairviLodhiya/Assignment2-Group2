@@ -5,7 +5,7 @@
 #include <string>
 #include <filesystem>
 
-#include "../Read Mesh/mesh_reader_kokkos.hpp"
+#include "../Read_Mesh/mesh_reader_kokkos.hpp"
 #include "../Element/create_element_coordinates.hpp"
 #include "../Element/element_stiffness.hpp"
 
