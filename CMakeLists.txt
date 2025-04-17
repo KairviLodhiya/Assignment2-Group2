@@ -13,6 +13,12 @@ set(Kokkos_DIR "$ENV{HOME}/kokkos-ci-install/lib/cmake/Kokkos")
 find_package(Kokkos REQUIRED)
 
 # --------------------------
+# Catch2 Setup
+# --------------------------
+set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};$ENV{HOME}/catch2/install")
+find_package(Catch2 3 REQUIRED)
+
+# --------------------------
 # Mesh Reader Library
 # --------------------------
 add_library(mesh_reader mesh_reader_kokkos.cpp)
@@ -27,61 +33,32 @@ target_include_directories(element_stiffness PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(element_stiffness PUBLIC Kokkos::kokkos)
 
 # --------------------------
-# Catch2 Tests
+# Combined Test Executable
 # --------------------------
-set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};$ENV{HOME}/catch2/install")
-find_package(Catch2 3 REQUIRED)
-
-add_executable(mesh_reader_test mesh_reader_test.cpp)
-target_link_libraries(mesh_reader_test PRIVATE mesh_reader Catch2::Catch2WithMain)
-
-add_executable(element_stiffness_test elementstiffness_main.cpp element_stiffness_test.cpp)
-target_link_libraries(element_stiffness_test PRIVATE element_stiffness Catch2::Catch2)
-
-add_executable(SparseMatrixTests
+add_executable(all_tests
+    test_main.cpp  # This file contains Catch2 main() with Kokkos::initialize/finalize
+    test_read_mesh_integration.cpp
+    test_element_stiffness.cpp
     test_sparse_matrix.cpp
-    SparseMatrixCSR.cpp
-)
-add_executable(LoadVectorTests
     test_load_vector.cpp
-    LoadVector.cpp
+    mesh_reader_test.cpp
 )
 
-target_link_libraries(SparseMatrixTests
-  PRIVATE
+target_link_libraries(all_tests
+    PRIVATE
+    mesh_reader
+    element_stiffness
     Kokkos::kokkos
-    Catch2::Catch2WithMain
-)
-target_link_libraries(LoadVectorTests
-  PRIVATE
-    Kokkos::kokkos
-    Catch2::Catch2WithMain
+    Catch2::Catch2
 )
 
-target_include_directories(SparseMatrixTests PRIVATE
-  ${CMAKE_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/external/Catch2/src  # <- Needed for headers
-)
-target_include_directories(LoadVectorTests PRIVATE
+target_include_directories(all_tests PRIVATE
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/external/Catch2/src
 )
 
 # --------------------------
-# Read Mesh Integration Test
+# CTest Integration
 # --------------------------
-add_executable(ReadMeshIntegrationTest
-    test_read_mesh_integration.cpp
-)
-
-target_link_libraries(ReadMeshIntegrationTest
-  PRIVATE
-    mesh_reader
-    element_stiffness
-    Kokkos::kokkos
-    Catch2::Catch2WithMain
-)
-
-target_include_directories(ReadMeshIntegrationTest PRIVATE
-  ${CMAKE_SOURCE_DIR}
-)
+enable_testing()
+add_test(NAME AllFEMTests COMMAND all_tests)

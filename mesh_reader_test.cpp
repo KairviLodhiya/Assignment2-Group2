@@ -27,8 +27,6 @@ $Elements
 $EndElements
 )";
     out.close();
-
-    Kokkos::initialize();
     {
         Mesh2D mesh = read_mesh(mesh_filename);
 
@@ -43,7 +41,6 @@ $EndElements
         CHECK_THAT(coords_host(1, 0), WithinAbs(1.0, 1e-12));
         CHECK_THAT(coords_host(2, 1), WithinAbs(1.0, 1e-12));
     }
-    Kokkos::finalize();
 
     std::filesystem::remove(mesh_filename);
 }

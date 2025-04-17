@@ -6,7 +6,6 @@
 using Catch::Approx;
 
 TEST_CASE("LoadVector basic operations", "[LoadVector]") {
-    Kokkos::initialize();
     {
         const int N = 5;
         LoadVector lv(N);
@@ -33,5 +32,4 @@ TEST_CASE("LoadVector basic operations", "[LoadVector]") {
                 REQUIRE(host_view(i) == 0.0);
         }
     }
-    Kokkos::finalize();
 }

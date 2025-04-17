@@ -7,7 +7,6 @@
 using Catch::Approx;
 
 TEST_CASE("Identity Matrix Multiply", "[csr]") {
-  Kokkos::initialize();
 
   {
     const int N = 3;
@@ -42,6 +41,4 @@ TEST_CASE("Identity Matrix Multiply", "[csr]") {
         REQUIRE(h_y(i) == Approx(h_x(i)));
     }
   }
-
-  Kokkos::finalize();
 }
