@@ -26,10 +26,6 @@ You can install Kokkos and Catch2 manually or using a package manager like `vcpk
 
 . ├── CMakeLists.txt ├── mesh_reader_kokkos.cpp / .hpp ├── element_stiffness.cpp / .hpp ├── SparseMatrixCSR.cpp / .hpp ├── LoadVector.cpp / .hpp ├── coo_to_csr.hpp ├── assemble_system.hpp ├── test_main.cpp ├── test_*.cpp ├── README.md
 
-yaml
-Copy
-Edit
-
 ---
 
 ## Running the Code
