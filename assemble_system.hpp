@@ -1,6 +1,10 @@
 #ifndef ASSEMBLE_SYSTEM_HPP
 #define ASSEMBLE_SYSTEM_HPP
 
+#include "SparseMatrixCSR.hpp"   
+#include "LoadVector.hpp"         
+#include "create_element_coordinates.hpp"  
+
 inline void assemble_system(const Mesh2D& mesh, SparseMatrixCSR& K_global, LoadVector& F_global, double kappa, const Kokkos::View<double*>& f_elem) {
     const int num_elems = mesh.num_elements;
     const int nodes_per_elem = mesh.nodes_per_elem;
