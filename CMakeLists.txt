@@ -42,7 +42,7 @@ target_link_libraries(sparse_matrix_lib PUBLIC Kokkos::kokkos)
 # --------------------------
 # Load Vector Library
 # --------------------------
-add_library(load_vector_lib LoadVector.cpp)
+add_library(load_vector_lib LoadVector.hpp)
 target_include_directories(load_vector_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(load_vector_lib PUBLIC Kokkos::kokkos)
 
