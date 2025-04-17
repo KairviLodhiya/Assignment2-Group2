@@ -253,16 +253,19 @@ void ElementStiffness::computeQuadLoadVectorKokkos(
 
     Kokkos::parallel_for("ComputeQuadLoadVector", policy_type(0, numElements),
         KOKKOS_LAMBDA(const int elem) {
-            // Local load vector
-            double localFe[4] = {0.0, 0.0, 0.0, 0.0};
-
-            // Gauss quadrature points and weights for 2x2 integration
-            const double gaussPoints[2] = { -1.0 / Kokkos::sqrt(3.0), 1.0 / Kokkos::sqrt(3.0) };
-            const double gaussWeights[2] = { 1.0, 1.0 };
-
-            // Loop over Gauss points
-            for (int i = 0; i < 2; ++i) {
-                for (int j = 0; j < 2; ++j) {
+            Kokkos::View<double[4], Kokkos::LayoutRight, Kokkos::MemoryTraits<Kokkos::Unmanaged>> localFe;
+            // Initialize Fe to zero for this element
+            for (int i = 0; i < 4; i++) {
+                Fe(elem, i) = 0.0;
+            }
+            
+            // Gauss quadrature points and weights for 2x2 quadrature
+            const double gaussPoints[2] = {-1.0/Kokkos::sqrt(3.0), 1.0/Kokkos::sqrt(3.0)};
+            const double gaussWeights[2] = {1.0, 1.0};
+            
+            // Loop over quadrature points
+            for (int i = 0; i < 2; i++) {
+                for (int j = 0; j < 2; j++) {
                     double xi = gaussPoints[i];
                     double eta = gaussPoints[j];
                     double weight = gaussWeights[i] * gaussWeights[j];
