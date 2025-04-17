@@ -20,4 +20,4 @@ public:
   void matvec(const ViewVector& x, ViewVector& y) const;
 };
 
-#endif
+#endif // SPARSE_MATRIX_CSR_HPP

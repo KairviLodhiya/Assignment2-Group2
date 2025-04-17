@@ -1,5 +1,7 @@
+#ifndef LOAD_VECTOR_HPP
+#define LOAD_VECTOR_HPP
+
 #include <Kokkos_Core.hpp>
-#include <iostream>
 
 class LoadVector {
 public:
@@ -12,20 +14,22 @@ public:
 
   LoadVector(int n) : size(n), data("load_vector", n) {}
 
-  
   void zero() {
     Kokkos::parallel_for("ZeroLoadVector", Kokkos::RangePolicy<exec_space>(0, size),
         KOKKOS_LAMBDA(int i) {
-                            data(i) = 0.0;
-                            });
-                }
-
-    void add(int index, double value) {
-        Kokkos::parallel_for("AddToLoadVector", 1, KOKKOS_LAMBDA(int) {
-          data(index) += value; 
+          data(i) = 0.0;
         });
-      }
-      ViewVector get_data() const {
-        return data;
-      }
+  }
+
+  void add(int index, double value) {
+    Kokkos::parallel_for("AddToLoadVector", 1, KOKKOS_LAMBDA(int) {
+      data(index) += value; 
+    });
+  }
+
+  ViewVector get_data() const {
+    return data;
+  }
 };
+
+#endif // LOAD_VECTOR_HPP
