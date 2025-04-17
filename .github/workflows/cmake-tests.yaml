@@ -27,8 +27,31 @@ jobs:
 
     - name: Build
       run: ./install.sh .. ${{matrix.build_type}} ${{matrix.compiler}}
-    - name: Run All FEM Tests
+
+    - name: Run Unit Tests
       run: |
         cd ../build-class
         make
-        ./all_tests --reporter console --success
+        ./fem_main --reporter compact --success
+
+    - name: Create Sample Mesh File
+      run: |
+        cat <<EOF > triangle1.msh
+        \$MeshFormat
+        2.2 0 8
+        \$EndMeshFormat
+        \$Nodes
+        3
+        1 0.0 0.0 0.0
+        2 1.0 0.0 0.0
+        3 0.0 1.0 0.0
+        \$EndNodes
+        \$Elements
+        1
+        1 2 1 0 1 2 3
+        \$EndElements
+        EOF
+
+    - name: Run FEM Driver with triangle1.msh
+      run: |
+        ./fem_main triangle1.msh x2y

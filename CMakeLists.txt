@@ -42,15 +42,15 @@ target_link_libraries(sparse_matrix_lib PUBLIC Kokkos::kokkos)
 # --------------------------
 # Load Vector Library
 # --------------------------
-add_library(load_vector_lib Global/LoadVector.hpp) 
-target_include_directories(load_vector_lib PUBLIC ${CMAKE_SOURCE_DIR})
-target_link_libraries(load_vector_lib PUBLIC Kokkos::kokkos)
+add_library(load_vector_lib INTERFACE)
+target_include_directories(load_vector_lib INTERFACE ${CMAKE_SOURCE_DIR})
+target_link_libraries(load_vector_lib INTERFACE Kokkos::kokkos)
 
 # --------------------------
-# Combined Test Executable
+# FEM Executable with Tests + Driver
 # --------------------------
-add_executable(all_tests
-    Testing/test_main.cpp
+add_executable(fem_main
+    Driver/main.cpp
     Testing/test_read_mesh_integration.cpp
     Testing/test_element_stiffness.cpp
     Testing/test_sparse_matrix.cpp
@@ -59,7 +59,7 @@ add_executable(all_tests
     Testing/test_assembly.cpp
 )
 
-target_link_libraries(all_tests
+target_link_libraries(fem_main
     PRIVATE
     mesh_reader
     element_stiffness
@@ -69,13 +69,13 @@ target_link_libraries(all_tests
     Catch2::Catch2
 )
 
-target_include_directories(all_tests PRIVATE
-  ${CMAKE_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/external/Catch2/src
+target_include_directories(fem_main PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/external/Catch2/src
 )
 
 # --------------------------
-# CTest Integration
+# CTest Integration (optional)
 # --------------------------
 enable_testing()
-add_test(NAME AllFEMTests COMMAND all_tests)
+add_test(NAME AllFEMTests COMMAND fem_main)
