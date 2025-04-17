@@ -1,4 +1,4 @@
-#include "../Read Mesh/mesh_reader_kokkos.hpp"
+#include "mesh_reader_kokkos.hpp"
 #include <fstream>
 #include <vector>
 #include <string>
