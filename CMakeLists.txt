@@ -21,7 +21,7 @@ find_package(Catch2 3 REQUIRED)
 # --------------------------
 # Mesh Reader Library
 # --------------------------
-add_library(mesh_reader Read_Mesh/mesh_reader_kokkos.cpp)
+add_library(mesh_reader ReadMesh/mesh_reader_kokkos.cpp)
 target_include_directories(mesh_reader PUBLIC ${CMAKE_SOURCE_DIR})
 target_link_libraries(mesh_reader PUBLIC Kokkos::kokkos)
 
