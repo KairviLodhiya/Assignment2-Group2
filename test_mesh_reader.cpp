@@ -11,8 +11,7 @@ TEST_CASE("read_mesh loads small triangle mesh", "[mesh]") {
     std::string mesh_filename = std::filesystem::temp_directory_path() / "test_mesh.msh";
 
     std::ofstream out(mesh_filename);
-    out << R"(
-$MeshFormat
+    out << R"($MeshFormat
 2.2 0 8
 $EndMeshFormat
 $Nodes
@@ -27,13 +26,20 @@ $Elements
 $EndElements
 )";
     out.close();
+
     {
         Mesh2D mesh = read_mesh(mesh_filename);
 
+        // Defensive checks
         REQUIRE(mesh.num_nodes == 3);
         REQUIRE(mesh.num_elements == 1);
         REQUIRE(mesh.nodes_per_elem == 3);
+        REQUIRE(mesh.node_coords.extent(0) == 3);
+        REQUIRE(mesh.node_coords.extent(1) == 2);
+        REQUIRE(mesh.element_connectivity.extent(0) == 1);
+        REQUIRE(mesh.element_connectivity.extent(1) == 3);
 
+        // Copy and check coordinates
         auto coords_host = Kokkos::create_mirror_view(mesh.node_coords);
         Kokkos::deep_copy(coords_host, mesh.node_coords);
 
