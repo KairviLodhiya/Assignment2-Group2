@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <Kokkos_Core.hpp>
 #include <fstream>
 #include <string>
@@ -7,6 +8,8 @@
 #include "mesh_reader_kokkos.hpp"
 #include "create_element_coordinates.hpp"
 #include "element_stiffness.hpp"
+
+using Catch::Matchers::WithinAbs;
 
 TEST_CASE("read_mesh + stiffness/load vector integration", "[fem][mesh]") {
     Kokkos::initialize();
@@ -63,8 +66,8 @@ $EndElements
             for (int i = 0; i < 3; ++i) {
                 for (int j = 0; j < 3; ++j) {
                     sum += std::abs(K_host(0, i, j));
-                    // Symmetry check
-                    REQUIRE(K_host(0, i, j) == Approx(K_host(0, j, i)).margin(1e-12));
+                    // Symmetry check using matcher
+                    REQUIRE_THAT(K_host(0, i, j), WithinAbs(K_host(0, j, i), 1e-12));
                 }
             }
             REQUIRE(sum > 0.0);
@@ -75,7 +78,7 @@ $EndElements
             for (int i = 0; i < 3; ++i) {
                 total += Fe_host(0, i);
             }
-            REQUIRE(total == Approx(1.0).margin(1e-12)); // area=0.5, f=2 → total=1
+            REQUIRE_THAT(total, WithinAbs(1.0, 1e-12)); // area = 0.5, f = 2 → total = 1
         }
     }
     Kokkos::finalize();
