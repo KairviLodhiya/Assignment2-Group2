@@ -9,7 +9,7 @@ This project implements a parallel 2D Finite Element Method (FEM) solver using [
 
 ---
 
-## 🛠 Dependencies
+## Dependencies
 
 Make sure the following are installed and available:
 
@@ -47,7 +47,7 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
 make -j
-💡 If using a custom install prefix for Kokkos or Catch2, add:
+If using a custom install prefix for Kokkos or Catch2, add:
 
 bash
 Copy
