@@ -25,25 +25,6 @@ target_link_libraries(mesh_reader PUBLIC Kokkos::kokkos)
 add_library(element_stiffness element_stiffness.cpp)
 target_include_directories(element_stiffness PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(element_stiffness PUBLIC Kokkos::kokkos)
-target_link_libraries(SparseMatrixTests
-  PRIVATE
-    Kokkos::kokkos
-    Catch2::Catch2WithMain
-)
-target_link_libraries(LoadVectorTests
-  PRIVATE
-    Kokkos::kokkos
-    Catch2::Catch2WithMain
-)
-
-target_include_directories(SparseMatrixTests PRIVATE
-  ${CMAKE_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/external/Catch2/src  # <- Needed for headers
-)
-target_include_directories(LoadVectorTests PRIVATE
-  ${CMAKE_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/external/Catch2/src
-)
 
 # --------------------------
 # Catch2 Tests
@@ -65,4 +46,25 @@ add_executable(LoadVectorTests
     test_load_vector.cpp
     LoadVector.cpp
 )
+
+target_link_libraries(SparseMatrixTests
+  PRIVATE
+    Kokkos::kokkos
+    Catch2::Catch2WithMain
+)
+target_link_libraries(LoadVectorTests
+  PRIVATE
+    Kokkos::kokkos
+    Catch2::Catch2WithMain
+)
+
+target_include_directories(SparseMatrixTests PRIVATE
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}/external/Catch2/src  # <- Needed for headers
+)
+target_include_directories(LoadVectorTests PRIVATE
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}/external/Catch2/src
+)
+
 
