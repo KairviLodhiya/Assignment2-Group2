@@ -6,13 +6,13 @@
 
 #include <catch2/catch_session.hpp>
 
-#include "mesh_reader_kokkos.hpp"
-#include "element_stiffness.hpp"
-#include "coo_to_csr.hpp"
-#include "assemble_system.hpp"
-#include "LoadVector.hpp"
-#include "SparseMatrixCSR.hpp"
-#include "create_element_coordinates.hpp"
+#include "../ReadMesh/mesh_reader_kokkos.hpp"
+#include "../Element/element_stiffness.hpp"
+#include "../Assembly/coo_to_csr.hpp"
+#include "../Assembly/assemble_system.hpp"
+#include "../Global/LoadVector.hpp"
+#include "../Global/SparseMatrixCSR.hpp"
+#include "../Element/create_element_coordinates.hpp"
 
 int run_driver(const std::string& mesh_file, const std::string& force_expr) {
     // Dispatch table of valid expressions
