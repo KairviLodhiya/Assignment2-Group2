@@ -1,4 +1,4 @@
-# 🚀 Assignment 2: Parallel Finite Element Solver
+# Assignment 2: Parallel Finite Element Solver
 
 This project implements a parallel 2D Finite Element Method (FEM) solver using [Kokkos](https://github.com/kokkos/kokkos) for performance portability and [Catch2](https://github.com/catchorg/Catch2) for unit testing. It includes functionality for:
 
