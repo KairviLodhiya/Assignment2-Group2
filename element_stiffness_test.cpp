@@ -4,6 +4,7 @@
 #include <Kokkos_Core.hpp>
 #include "element_stiffness.hpp"
 
+
 TEST_CASE("Triangle stiffness matrix", "[ElementStiffness]") {
     
     // Create a sample triangle with vertices at (0,0), (1,0), and (0,1)
@@ -49,6 +50,51 @@ TEST_CASE("Triangle stiffness matrix", "[ElementStiffness]") {
 
 }
 
+TEST_CASE("Triangle stiffness matrix with irregular shape", "[ElementStiffness]") {
+    
+    // Create a sample triangle with vertices at (2.5,1.3, (4.2,0.7) and (3.1,3.8)
+    const int numElements = 1;
+    Kokkos::View<double***> coords("coords", numElements, 3, 2);
+    Kokkos::View<double***> K("K", numElements, 3, 3);
+    
+    // Initialize host view for coordinates
+    auto h_coords = Kokkos::create_mirror_view(coords);
+    
+    // Triangle with vertices at (2.5,1.3), (4.2,0.7) and (3.1,3.8)
+    h_coords(0, 0, 0) = 2.5; h_coords(0, 0, 1) = 1.3; // Node 1 (x1, y1)
+    h_coords(0, 1, 0) = 4.2; h_coords(0, 1, 1) = 0.7; // Node 2 (x2, y2)
+    h_coords(0, 2, 0) = 3.1; h_coords(0, 2, 1) = 3.8; // Node 3 (x3, y3)
+    
+    // Copy host data to device
+    Kokkos::deep_copy(coords, h_coords);
+    
+    // Define material property and create ElementStiffness object
+    double kappa = 1.0;
+    ElementStiffness stiffness(kappa);
+    
+    // Compute stiffness matrix
+    stiffness.computeTriangleStiffnessKokkos(coords, K);
+    
+    // Copy results back to host for verification
+    auto h_K = Kokkos::create_mirror_view(K);
+    Kokkos::deep_copy(h_K, K);
+    
+    // Expected stiffness matrix
+    double expected[3][3] = {
+        { 2.348, -1.535, -0.805 },
+        { -1.535, 1.432, 0.101 },
+        { -0.805, 0.101, 0.705 }
+    };
+
+    
+    // Check results
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            REQUIRE(h_K(0, i, j) == Catch::Approx(expected[i][j]).margin(1e-2));
+        }
+    }
+
+}
 TEST_CASE("Quad stiffness matrix", "[ElementStiffness]") {
      
     // Create a sample quad with vertices at (0,0), (1,0), (1,1), and (0,1)
@@ -184,6 +230,75 @@ TEST_CASE("Quad load vector", "[ElementStiffness]") {
     
 }
 
+TEST_CASE("Quadrilateral stiffness matrix multiple elements", "[ElementStiffness]") {
+    // Create two quadrilaterals
+    const int numElements = 2;
+    Kokkos::View<double***> coords("coords", numElements, 4, 2);
+    Kokkos::View<double***> K("K", numElements, 4, 4);
+
+    // Initialize host view for coordinates
+    auto h_coords = Kokkos::create_mirror_view(coords);
+    // First quadrilateral with vertices at (0,0), (1,0), (1,1), (0,1)
+    h_coords(0, 0, 0) = 0.0; h_coords(0, 0, 1) = 0.0;
+    h_coords(0, 1, 0) = 1.0; h_coords(0, 1, 1) = 0.0;
+    h_coords(0, 2, 0) = 1.0; h_coords(0, 2, 1) = 1.0;
+    h_coords(0, 3, 0) = 0.0; h_coords(0, 3, 1) = 1.0;
+    // Second quadrilateral with vertices at (1,0), (3,0), (3,1), (1,1)
+    h_coords(1, 0, 0) = 1.0; h_coords(1, 0, 1) = 0.0;
+    h_coords(1, 1, 0) = 3.0; h_coords(1, 1, 1) = 0.0;
+    h_coords(1, 2, 0) = 3.0; h_coords(1, 2, 1) = 1.0;
+    h_coords(1, 3, 0) = 1.0; h_coords(1, 3, 1) = 1.0;
+    // Copy host data to device
+    Kokkos::deep_copy(coords, h_coords);
+    // Define material property and create ElementStiffness object
+    double kappa = 1.0;
+    ElementStiffness stiffness(kappa);
+    // Compute stiffness matrix
+    stiffness.computeQuadStiffnessKokkos(coords, K);
+    // Copy results back to host for verification
+    auto h_K = Kokkos::create_mirror_view(K);
+    Kokkos::deep_copy(h_K, K);
+    // Expected stiffness matrix for first quadrilateral
+    // First quadrilateral stiffness matrix (vertices (0,0), (1,0), (1,1), (0,1))
+    double expected1[4][4] = {
+        {2.0/3.0, -1.0/6.0, -1.0/3.0, -1.0/6.0},
+        {-1.0/6.0, 2.0/3.0, -1.0/6.0, -1.0/3.0},
+        {-1.0/3.0, -1.0/6.0, 2.0/3.0, -1.0/6.0},
+        {-1.0/6.0, -1.0/3.0, -1.0/6.0, 2.0/3.0}
+    };
+    double expected2[4][4] = {
+        { 0.8333333,  0.1666667, -0.4166667, -0.5833333},
+        { 0.1666667,  0.8333333, -0.5833333, -0.4166667},
+        {-0.4166667, -0.5833333,  0.8333333,  0.1666667},
+        {-0.5833333, -0.4166667,  0.1666667,  0.8333333}
+    };
+
+        // // Print the results for debugging
+        // for (int i = 0; i < numElements; i++) {
+        //     std::cout << "Stiffness matrix for element " << i << ":\n";
+        //     for (int j = 0; j < 4; j++) {
+        //         for (int k = 0; k < 4; k++) {
+        //             std::cout << h_K(i, j, k) << " ";
+        //         }
+        //         std::cout << "\n";
+        //     }
+        //     std::cout << "\n";
+        // }
+        
+        // Check results for first quadrilateral
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                REQUIRE(h_K(0, i, j) == Catch::Approx(expected1[i][j]).margin(1e-5));
+            }
+        }
+        // Check results for second quadrilateral
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                REQUIRE(h_K(1, i, j) == Catch::Approx(expected2[i][j]).margin(1e-5));
+            }
+        }
+}
+
 TEST_CASE("Triangle stiffness matrix for multiple elements", "[ElementStiffness]") {
     
     // Create two triangles
@@ -199,9 +314,9 @@ TEST_CASE("Triangle stiffness matrix for multiple elements", "[ElementStiffness]
     h_coords(0, 1, 0) = 1.0; h_coords(0, 1, 1) = 0.0;
     h_coords(0, 2, 0) = 0.0; h_coords(0, 2, 1) = 1.0;
     
-    // Second triangle with vertices at (1,0), (1,1), (0,1)
-    h_coords(1, 0, 0) = 1.0; h_coords(1, 0, 1) = 0.0;
-    h_coords(1, 1, 0) = 1.0; h_coords(1, 1, 1) = 1.0;
+    // Second triangle with vertices at (1,1), (1,0), (0,1) following the same order
+    h_coords(1, 0, 0) = 1.0; h_coords(1, 0, 1) = 1.0;
+    h_coords(1, 1, 0) = 1.0; h_coords(1, 1, 1) = 0.0;
     h_coords(1, 2, 0) = 0.0; h_coords(1, 2, 1) = 1.0;
     
     // Copy host data to device
@@ -225,13 +340,13 @@ TEST_CASE("Triangle stiffness matrix for multiple elements", "[ElementStiffness]
         {-1.0,  0.0,  1.0}
     };
     
-    // Expected stiffness matrix for second triangle
+    // Corrected expected stiffness matrix for second triangle
     double expected2[3][3] = {
-        { 1.0,  0.0, -1.0},
-        { 0.0,  1.0, -1.0},
-        {-1.0, -1.0,  2.0}
+        { 2.0, -1.0, -1.0},
+        {-1.0,  1.0,  0.0},
+        {-1.0,  0.0,  1.0}
     };
-    
+
     // Check results for first triangle
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
