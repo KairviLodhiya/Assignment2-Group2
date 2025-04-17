@@ -33,10 +33,24 @@ target_include_directories(element_stiffness PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(element_stiffness PUBLIC Kokkos::kokkos)
 
 # --------------------------
+# Sparse Matrix Library
+# --------------------------
+add_library(sparse_matrix_lib SparseMatrixCSR.cpp)
+target_include_directories(sparse_matrix_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(sparse_matrix_lib PUBLIC Kokkos::kokkos)
+
+# --------------------------
+# Load Vector Library
+# --------------------------
+add_library(load_vector_lib LoadVector.cpp)
+target_include_directories(load_vector_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(load_vector_lib PUBLIC Kokkos::kokkos)
+
+# --------------------------
 # Combined Test Executable
 # --------------------------
 add_executable(all_tests
-    test_main.cpp  # This file contains Catch2 main() with Kokkos::initialize/finalize
+    test_main.cpp  # Catch2 main() with Kokkos::initialize/finalize
     test_read_mesh_integration.cpp
     test_element_stiffness.cpp
     test_sparse_matrix.cpp
@@ -48,6 +62,8 @@ target_link_libraries(all_tests
     PRIVATE
     mesh_reader
     element_stiffness
+    sparse_matrix_lib
+    load_vector_lib
     Kokkos::kokkos
     Catch2::Catch2
 )
