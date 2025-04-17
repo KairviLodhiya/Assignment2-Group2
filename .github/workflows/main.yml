@@ -38,6 +38,8 @@ jobs:
         cmake .. \
           -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/kokkos-install \
           -DKokkos_DIR=$GITHUB_WORKSPACE/kokkos-install/lib/cmake/Kokkos
+          -DCatch2_DIR=$GITHUB_WORKSPACE/catch2-install/lib/cmake/Catch2
+          
     - name: Clone and build Catch2
       run: |
         git clone --branch v3.5.4 https://github.com/catchorg/Catch2.git
