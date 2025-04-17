@@ -35,11 +35,20 @@ jobs:
         ./mesh_reader_test
     
     - name: Run Sparse Matrix Tests
-      run: ./SparseMatrixTests
+      run: | 
+        cd ../build-class
+        make
+        ./SparseMatrixTests
 
     - name: Run Load Vector Tests
-      run: ./LoadVectorTests
+      run: | 
+        cd ../build-class
+        make
+        ./LoadVectorTests
     
     - name: Run Element Stiffness Test
-      run: ./element_stiffness_test
+      run: | 
+        cd ../build-class
+        make
+        ./element_stiffness_test
       
