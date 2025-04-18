@@ -7,13 +7,13 @@
 
 #include "../ReadMesh/mesh_reader_kokkos.hpp"
 #include "../Element/element_stiffness.hpp"
-#include "../Assembly/coo_to_csr.hpp"
 #include "../Assembly/assemble_system.hpp"
+#include "../Assembly/assemble_system_gpu.hpp"
 #include "../Global/LoadVector.hpp"
 #include "../Global/SparseMatrixCSR.hpp"
 #include "../Element/create_element_coordinates.hpp"
 
-int run_driver(const std::string& mesh_file, const std::string& force_expr) {
+int run_driver(const std::string& mesh_file, const std::string& force_expr, bool use_gpu) {
     std::unordered_map<std::string, std::function<double(double, double)>> force_dispatch = {
         {"1", [](double, double) { return 1.0; }},
         {"x", [](double x, double) { return x; }},
@@ -61,7 +61,13 @@ int run_driver(const std::string& mesh_file, const std::string& force_expr) {
     LoadVector F_global(mesh.num_nodes);
     F_global.zero();
 
-    assemble_system(mesh, K_global, F_global, 1.0, f_elem);
+    if (use_gpu) {
+        std::cout << "[INFO] Running GPU assembly...\n";
+        assemble_system_gpu(mesh, K_global, F_global, 1.0, f_elem);
+    } else {
+        std::cout << "[INFO] Running CPU assembly...\n";
+        assemble_system(mesh, K_global, F_global, 1.0, f_elem);
+    }
 
     auto F_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), F_global.get_data());
 
@@ -77,7 +83,6 @@ int main(int argc, char* argv[]) {
     Kokkos::initialize(argc, argv);
     int result = 0;
 
-    // Determine if we should run Catch2 tests
     bool run_tests = (argc == 1);
     for (int i = 1; i < argc; ++i) {
         std::string arg(argv[i]);
@@ -90,10 +95,11 @@ int main(int argc, char* argv[]) {
     if (run_tests) {
         result = Catch::Session().run(argc, argv);
     } else if (argc >= 3) {
-        result = run_driver(argv[1], argv[2]);
+        bool use_gpu = (argc >= 4 && std::string(argv[3]) == "gpu");
+        result = run_driver(argv[1], argv[2], use_gpu);
     } else {
         std::cerr << "Usage:\n"
-                  << "  To run driver: " << argv[0] << " <mesh_file.msh> <force_expr>\n"
+                  << "  To run driver: " << argv[0] << " <mesh_file.msh> <force_expr> [gpu]\n"
                   << "  To run tests : " << argv[0] << " --reporter console --success\n";
         result = 1;
     }

@@ -40,14 +40,21 @@ target_include_directories(sparse_matrix_lib PUBLIC ${CMAKE_SOURCE_DIR})
 target_link_libraries(sparse_matrix_lib PUBLIC Kokkos::kokkos)
 
 # --------------------------
-# Load Vector Library
+# Load Vector Header-Only Library
 # --------------------------
 add_library(load_vector_lib INTERFACE)
 target_include_directories(load_vector_lib INTERFACE ${CMAKE_SOURCE_DIR})
 target_link_libraries(load_vector_lib INTERFACE Kokkos::kokkos)
 
 # --------------------------
-# FEM Executable with Tests + Driver
+# GPU COO to CSR (Device Assembly) Header-Only
+# --------------------------
+add_library(assembly_gpu_lib INTERFACE)
+target_include_directories(assembly_gpu_lib INTERFACE ${CMAKE_SOURCE_DIR})
+target_link_libraries(assembly_gpu_lib INTERFACE Kokkos::kokkos)
+
+# --------------------------
+# FEM Executable with Driver + Tests
 # --------------------------
 add_executable(fem_main
     Driver/main.cpp
@@ -65,6 +72,7 @@ target_link_libraries(fem_main
     element_stiffness
     sparse_matrix_lib
     load_vector_lib
+    assembly_gpu_lib
     Kokkos::kokkos
     Catch2::Catch2
 )
@@ -75,7 +83,7 @@ target_include_directories(fem_main PRIVATE
 )
 
 # --------------------------
-# CTest Integration (optional)
+# CTest Integration (Optional)
 # --------------------------
 enable_testing()
 add_test(NAME AllFEMTests COMMAND fem_main)

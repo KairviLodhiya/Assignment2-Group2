@@ -1,5 +1,6 @@
 name: CMake Tests
-on: 
+
+on:
   push:
 
 jobs:
@@ -14,47 +15,48 @@ jobs:
       matrix:
         build_type: [RelWithDebInfo]
         compiler: [g++]
-      
+        backend: [SERIAL, OPENMP] # Add CUDA with GPU
+
     steps:
+      - name: Update packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -yq valgrind libomp-dev
 
-    - name: Update packages
-      run: |
-        sudo apt-get update
-        sudo apt-get install -yq valgrind
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    - name: Checkout repo
-      uses: actions/checkout@v4
+      - name: Build with ${{ matrix.backend }}
+        run: |
+          ./install.sh .. ${{ matrix.build_type }} ${{ matrix.compiler }} ${{ matrix.backend }}
 
-    - name: Build
-      run: ./install.sh .. ${{matrix.build_type}} ${{matrix.compiler}}
+      - name: Run Unit Tests
+        run: |
+          cd ../build-class
+          make
+          ./fem_main --reporter compact --success
 
-    - name: Run Unit Tests
-      run: |
-        cd ../build-class
-        make
-        ./fem_main --reporter compact --success
+      - name: Create Sample Mesh File
+        run: |
+          cd ../build-class
+          cat <<EOF > triangle1.msh
+          \$MeshFormat
+          2.2 0 8
+          \$EndMeshFormat
+          \$Nodes
+          3
+          1 0.0 0.0 0.0
+          2 1.0 0.0 0.0
+          3 0.0 1.0 0.0
+          \$EndNodes
+          \$Elements
+          1
+          1 2 1 0 1 2 3
+          \$EndElements
+          EOF
 
-    - name: Create Sample Mesh File
-      run: |
-        cd ../build-class
-        cat <<EOF > triangle1.msh
-        \$MeshFormat
-        2.2 0 8
-        \$EndMeshFormat
-        \$Nodes
-        3
-        1 0.0 0.0 0.0
-        2 1.0 0.0 0.0
-        3 0.0 1.0 0.0
-        \$EndNodes
-        \$Elements
-        1
-        1 2 1 0 1 2 3
-        \$EndElements
-        EOF
-
-    - name: Run FEM Driver with triangle1.msh
-      run: |
-        cd ../build-class
-        make
-        ./fem_main triangle1.msh x2y
+      - name: Run FEM Driver with triangle1.msh
+        run: |
+          cd ../build-class
+          make
+          ./fem_main triangle1.msh x2y
