@@ -54,4 +54,6 @@ jobs:
 
     - name: Run FEM Driver with triangle1.msh
       run: |
+        cd build-class
+        make
         ./fem_main triangle1.msh x2y
