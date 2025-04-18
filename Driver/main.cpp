@@ -3,7 +3,6 @@
 #include <string>
 #include <unordered_map>
 #include <filesystem>
-
 #include <catch2/catch_session.hpp>
 
 #include "../ReadMesh/mesh_reader_kokkos.hpp"
@@ -15,7 +14,6 @@
 #include "../Element/create_element_coordinates.hpp"
 
 int run_driver(const std::string& mesh_file, const std::string& force_expr) {
-    // Dispatch table of valid expressions
     std::unordered_map<std::string, std::function<double(double, double)>> force_dispatch = {
         {"1", [](double, double) { return 1.0; }},
         {"x", [](double x, double) { return x; }},
@@ -43,7 +41,6 @@ int run_driver(const std::string& mesh_file, const std::string& force_expr) {
     auto force_func = force_dispatch[force_expr];
     Mesh2D mesh = read_mesh(mesh_file);
 
-    // Element-wise force evaluation at centroid
     Kokkos::View<double*> f_elem("f_elem", mesh.num_elements);
     auto coords_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), mesh.node_coords);
     auto conn_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), mesh.element_connectivity);
@@ -68,7 +65,7 @@ int run_driver(const std::string& mesh_file, const std::string& force_expr) {
 
     auto F_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), F_global.get_data());
 
-    std::cout << "\n Load vector (assembled):\n";
+    std::cout << "\nLoad vector (assembled):\n";
     for (int i = 0; i < mesh.num_nodes; ++i) {
         std::cout << "F[" << i << "] = " << F_host(i) << "\n";
     }
@@ -78,14 +75,27 @@ int run_driver(const std::string& mesh_file, const std::string& force_expr) {
 
 int main(int argc, char* argv[]) {
     Kokkos::initialize(argc, argv);
-    int result;
+    int result = 0;
 
-    if (argc >= 3) {
-        // If mesh file and force string provided, run driver
+    // Determine if we should run Catch2 tests
+    bool run_tests = (argc == 1);
+    for (int i = 1; i < argc; ++i) {
+        std::string arg(argv[i]);
+        if (arg.starts_with("--") || arg.starts_with("[")) {
+            run_tests = true;
+            break;
+        }
+    }
+
+    if (run_tests) {
+        result = Catch::Session().run(argc, argv);
+    } else if (argc >= 3) {
         result = run_driver(argv[1], argv[2]);
     } else {
-        // Otherwise run test suite
-        result = Catch::Session().run(argc, argv);
+        std::cerr << "Usage:\n"
+                  << "  To run driver: " << argv[0] << " <mesh_file.msh> <force_expr>\n"
+                  << "  To run tests : " << argv[0] << " --reporter console --success\n";
+        result = 1;
     }
 
     Kokkos::finalize();
