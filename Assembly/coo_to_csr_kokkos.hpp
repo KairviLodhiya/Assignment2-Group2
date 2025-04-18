@@ -36,7 +36,7 @@ inline void coo_to_csr_kokkos(const COOMatrixDevice& coo, SparseMatrixCSR& csr) 
 
     // Step 1: Count number of nonzeros per row
     Kokkos::parallel_for("CountNNZ", nnz, KOKKOS_LAMBDA(const int k) {
-        Kokkos::atomic_increment(&csr.row_ptr(coo.row_idx(k) + 1));
+        Kokkos::atomic_inc(&csr.row_ptr(coo.row_idx(k) + 1));
     });
 
     // Step 2: Exclusive scan on row_ptr

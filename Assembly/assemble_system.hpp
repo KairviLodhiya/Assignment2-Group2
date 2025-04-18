@@ -1,6 +1,7 @@
 #ifndef ASSEMBLE_SYSTEM_HPP
 #define ASSEMBLE_SYSTEM_HPP
 
+#include "coo_to_csr.hpp"
 #include "../Global/SparseMatrixCSR.hpp"   
 #include "../Global/LoadVector.hpp"         
 #include "../Element/create_element_coordinates.hpp"  
