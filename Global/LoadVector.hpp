@@ -22,10 +22,12 @@ public:
   }
 
   void add(int index, double value) {
+    auto data_ = data;
     Kokkos::parallel_for("AddToLoadVector", 1, KOKKOS_LAMBDA(int) {
-      data(index) += value; 
+      data_(index) += value;
     });
   }
+  
 
   ViewVector get_data() const {
     return data;
