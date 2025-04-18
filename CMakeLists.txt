@@ -64,6 +64,7 @@ add_executable(fem_main
     Testing/test_load_vector.cpp
     Testing/test_mesh_reader.cpp
     Testing/test_assembly.cpp
+    Testing/test_assembly_gpu.cpp
 )
 
 target_link_libraries(fem_main
