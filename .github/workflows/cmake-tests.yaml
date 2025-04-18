@@ -36,6 +36,7 @@ jobs:
 
     - name: Create Sample Mesh File
       run: |
+        cd ../build-class
         cat <<EOF > triangle1.msh
         \$MeshFormat
         2.2 0 8
