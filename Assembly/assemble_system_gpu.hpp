@@ -34,7 +34,7 @@ inline void assemble_system_gpu(const Mesh2D& mesh, SparseMatrixCSR& K_global, L
         for (int i = 0; i < nodes_per_elem; ++i) {
             int row = mesh.element_connectivity(e, i);
             double Fi = Fe(e, i);
-            Kokkos::atomic_add(&F_global.get_data()(i), value);
+            Kokkos::atomic_add(&F_global.get_data()(row), Fi);
 
             for (int j = 0; j < nodes_per_elem; ++j) {
                 int col = mesh.element_connectivity(e, j);
