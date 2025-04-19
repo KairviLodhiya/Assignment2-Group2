@@ -18,3 +18,4 @@
 \
 ## Conclusion
 1. Overall, our group did a good job of checking errors, working together, and setting up a well-organized codebase that is functional and works for CPU/GPU parallelization. I could have personally done a better job using branches and PRs, though.
+2. Additionally, our team did a good job at having regular meetings and using commit messages as a form of quick review to explain what we fixed and why we fixed it.
