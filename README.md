@@ -17,6 +17,10 @@ Kairvi Lodhiya - Part 2(C), 2(D), 2(E), 3(B)
 # Performance characteristics
 ## Runtime comparision
 ![Serial vs OpenMP vs CUDA](runtime_plot.png)
+## Runtime comparision for CPU and GPU
+![CPU vs GPU](cpu_vs_gpu_runtime.png)
+## Speed up
+![Speed up plot](speedup_plot.png)
 ## OpenMP parallel efficiency for 160000 mesh element
 ![OpenMP efficiency curve](openmp_efficiency.png)
 
