@@ -15,9 +15,11 @@ public:
   LoadVector(int n) : size(n), data("load_vector", n) {}
 
   void zero() {
+    auto local_data = data;
+    
     Kokkos::parallel_for("ZeroLoadVector", Kokkos::RangePolicy<exec_space>(0, size),
-        KOKKOS_LAMBDA(int i) {
-          data(i) = 0.0;
+        KOKKOS_LAMBDA(const int i) {
+          local_data(i) = 0.0;
         });
   }
 
@@ -28,7 +30,7 @@ public:
     });
   }
   
-
+  KOKKOS_INLINE_FUNCTION
   ViewVector get_data() const {
     return data;
   }

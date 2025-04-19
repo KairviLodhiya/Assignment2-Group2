@@ -30,11 +30,16 @@ inline void assemble_system_gpu(const Mesh2D& mesh, SparseMatrixCSR& K_global, L
     COOMatrixDevice coo = create_coo_matrix_device(mesh.num_nodes, mesh.num_nodes, max_nnz);
     Kokkos::View<int> coo_count("counter");
 
+
+
     Kokkos::parallel_for("AssembleCOO", num_elems, KOKKOS_LAMBDA(const int e) {
         for (int i = 0; i < nodes_per_elem; ++i) {
             int row = mesh.element_connectivity(e, i);
             double Fi = Fe(e, i);
-            Kokkos::atomic_add(&F_global.get_data()(row), Fi);
+
+            auto f_data = F_global.data;
+            
+            Kokkos::atomic_add(&f_data(row), Fi);  // using local reference
 
             for (int j = 0; j < nodes_per_elem; ++j) {
                 int col = mesh.element_connectivity(e, j);

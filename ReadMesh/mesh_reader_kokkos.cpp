@@ -71,18 +71,25 @@ Mesh2D read_mesh(const std::string& filename) {
     mesh.node_coords = Kokkos::View<double**>("node_coords", mesh.num_nodes, 2);
     mesh.element_connectivity = Kokkos::View<int**>("connectivity", mesh.num_elements, mesh.nodes_per_elem);
 
-    // Parallel copy node coordinates
-    Kokkos::parallel_for("CopyNodes", mesh.num_nodes, KOKKOS_LAMBDA(const int i) {
-        mesh.node_coords(i, 0) = host_coords[2 * i];
-        mesh.node_coords(i, 1) = host_coords[2 * i + 1];
-    });
+    // Create host mirrors of the device views
+    auto host_node_coords = Kokkos::create_mirror_view(mesh.node_coords);
+    auto host_elem_conn = Kokkos::create_mirror_view(mesh.element_connectivity);
 
-    // Parallel copy connectivity
-    Kokkos::parallel_for("CopyConnectivity", mesh.num_elements, KOKKOS_LAMBDA(const int e) {
+    // Copy data from std::vectors to host mirrors (on host)
+    for (int i = 0; i < mesh.num_nodes; ++i) {
+        host_node_coords(i, 0) = host_coords[2 * i];
+        host_node_coords(i, 1) = host_coords[2 * i + 1];
+    }
+
+    for (int e = 0; e < mesh.num_elements; ++e) {
         for (int j = 0; j < mesh.nodes_per_elem; ++j) {
-            mesh.element_connectivity(e, j) = host_connectivity[e * mesh.nodes_per_elem + j];
+            host_elem_conn(e, j) = host_connectivity[e * mesh.nodes_per_elem + j];
         }
-    });
+    }
+
+    // Copy from host mirror to device
+    Kokkos::deep_copy(mesh.node_coords, host_node_coords);
+    Kokkos::deep_copy(mesh.element_connectivity, host_elem_conn);
 
     return mesh;
 }
