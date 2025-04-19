@@ -5,8 +5,8 @@ Kairvi Lodhiya - Part 2(C), 2(D), 2(E), 3(B)
 
 # To build follow these instructions
 >> cmake -B build \
-    -DKokkos_ENABLE_OPENMP=OFF \ #(OFF for Serial and CUDA & ON for OPENMP)
-    -DKokkos_ENABLE_CUDA=OFF \ #(OFF for Serial and OPENMP & ON for CUDA)
+    -DKokkos_ENABLE_OPENMP=OFF \ #(OFF for Serial and CUDA & ON for OPENMP) \
+    -DKokkos_ENABLE_CUDA=OFF \ #(OFF for Serial and OPENMP & ON for CUDA) \
     .
 >> cd build & make -j${NPROC}
 
