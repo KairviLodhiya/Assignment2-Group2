@@ -17,4 +17,4 @@
 1. We split assembly into two parts. Checking mesh reader + element stiffness integration and mesh reader + element stiffness and global assembly. This worked out well to ensure each step of the process compiled and outputted the right result. For each assembly process, we have individual unit tests for the functions we wrote and additional tests for the assembly process.
 \
 ## Conclusion
-1. Overall, our group did a good job of checking errors, working together, and setting up a well-organized codebase that is functional and works for CPU/GPU parallelization.
+1. Overall, our group did a good job of checking errors, working together, and setting up a well-organized codebase that is functional and works for CPU/GPU parallelization. I could have personally done a better job using branches and PRs, though.
